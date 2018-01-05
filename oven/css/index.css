@@ -1,0 +1,23 @@
+@import url(../node_modules/normalize.css/normalize.css);
+/* boilerplate */
+*,
+*::after,
+*::before {
+  box-sizing: border-box; }
+
+ul {
+  list-style: none; }
+
+/* css */
+body {
+  background-color: #a9a9a9; }
+
+iframe {
+  border: 0px solid #fff;
+  width: 0;
+  height: 0; }
+
+form {
+  margin: 3rem; }
+
+/*# sourceMappingURL=index.css.map */

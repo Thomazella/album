@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="css/index.css" rel="stylesheet" media="screen">
+  <title>album feature test</title>
+</head>
+<body>
+  <main>
+    <form id="file_upload_form" method="post" enctype="multipart/form-data" action="upload.php">
+      <input name="file" id="file" size="27" type="file"/><br/>
+      <input type="submit" name="action" value="Upload"/><br/>
+      <iframe id="upload_target" name="upload_target" src="" hidden></iframe>
+    </form>
+  </main>
+</body>
+<script type="text/javascript" src="js/index.js"></script>
+<!-- <script type="text/javascript"></script> -->
+</html>
