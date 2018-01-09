@@ -10,7 +10,8 @@ ul {
 
 /* css */
 body {
-  background-color: #a9a9a9; }
+  background-color: #a9a9a9;
+  font-family: arial sans-serif; }
 
 iframe {
   border: 0px solid #fff;
