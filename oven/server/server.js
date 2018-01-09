@@ -1,26 +1,24 @@
-let http = require('http');
-let fs = require('fs');
-let path = require('path')
-let port = 8077
-let c = {
+const http = require('http');
+const fs = require('fs');
+const path = require('path')
+const port = 8077
+const c = {
   'green'   : '\033[32m',
   'red'     : '\033[31m',
   'yellow'  : '\033[33m',
   'w'       : '\033[39m', //white
 }
-let debug = false
+const debug = true
 http.createServer((request,response) => {
-  console.groupEnd(); //this req's console.group will be closed by the next req
-  debug && console.group(`⭐️  ${c.green}Request:${c.w}`);
-  debug && console.dir({
-    "method" : request.method,
-    "url" : request.url,
-    // "user-agent" : request.headers["user-agent"],
-  });
+  if (debug) {
+    console.groupEnd(); //this req's console.group will be closed by the next req
+    console.group(`⭐️  ${c.green}Request:${c.w}`);
+    console.dir({"method" : request.method,"url" : request.url})
+  }
   let file = `${process.cwd()}${request.url}` //make absolute path
   if (request.url === "/") file = process.cwd() //we avoid a case where file ends in "/"
   let headers = {'Content-Type': 'text/html'}
-  let mimeTypes = {
+  const mimeTypes = {
     '.html' :   'text/html',
     '.js'   :   'text/javascript',
     '.css'  :   'text/css',
@@ -69,7 +67,7 @@ http.createServer((request,response) => {
           return
       }
     }
-    let extention = String(path.extname(file)).toLowerCase()
+    const extention = String(path.extname(file)).toLowerCase()
     headers['Content-Type'] = mimeTypes[extention] || 'application/octet-stream' //<= unknown type
     fs.readFile(file, (err, data) => {
       if (err) {
@@ -84,7 +82,7 @@ http.createServer((request,response) => {
           response.end()
           return;
       }
-      debug && console.dir(headers)
+      if (debug) console.dir(headers)
       response.writeHead(200, headers);
       response.write(data)
       response.end();
