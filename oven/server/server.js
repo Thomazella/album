@@ -6,18 +6,18 @@ const c = {
   'green'   : '\033[32m',
   'red'     : '\033[31m',
   'yellow'  : '\033[33m',
-  'w'       : '\033[39m', //white
+  'white'   : '\033[39m',
 }
 const debug = true
 http.createServer((request,response) => {
   if (debug) {
     console.groupEnd(); //this req's console.group will be closed by the next req
-    console.group(`⭐️  ${c.green}Request:${c.w}`);
+    console.group(`⭐️  ${c.green}Request:${c.white}`);
     console.dir({"method" : request.method,"url" : request.url})
   }
   let file = `${process.cwd()}${request.url}` //make absolute path
   if (request.url === "/") file = process.cwd() //we avoid a case where file ends in "/"
-  let headers = {'Content-Type': 'text/html'}
+  let headers = {}
   const mimeTypes = {
     '.html' :   'text/html',
     '.js'   :   'text/javascript',
@@ -48,19 +48,23 @@ http.createServer((request,response) => {
     if (err) {
       switch (err.code) {
         case 'ENOENT':
-          console.error(`${c.red} 🔥 ${file} does not exist, serving 404${c.w} 🔥`);
-          response.writeHead(404, headers)
+          console.error(`${c.red} 🔥 ${file} does not exist, serving 404${c.white} 🔥`);
+          response.writeHead(404, {'Content-Type': 'text/html'})
           response.write(`
-            <body style="font-family: arial">
+            <head><meta charset="UTF-8"><link href="css/index.css" rel="stylesheet"></head>
+            <body class="errorPage">
               <h1>404</h1>
-              <p>${request.headers.host}${request.url} was not found</p>
-              <a href="http://${request.headers.host}">go home</a>
+              <p class="url">${request.headers.host}${request.url}</p>
+              <span class="message">not found</span>
+              <span class="message"> 🤷🏻‍  </span>
+              <p class="link"><span> 👉🏻 </span>
+              <a href="http://${request.headers.host}">go home</a></p>
             </body>`)
           response.end()
           return;
         case 'EISDIR':
           file = `${file}/index.html` //browser asked for a dir, give the index.html of that dir
-          console.log(`${c.yellow}dir request: "${request.url}", serving "${file}${c.w}"`);
+          console.log(`${c.yellow}dir request: "${request.url}", serving "${file}${c.white}"`);
           break;
         default:
           throw err;
@@ -74,10 +78,12 @@ http.createServer((request,response) => {
         console.dir(err)
         response.writeHead(500, {'Content-Type':'text/html'})
         response.write(`
-          <body style="font-family: arial">
-          <h1>500</h1>
-          <p>Internal error, we're sorry</p>
-          <a href="http://${request.headers.host}">go home</a>
+          <head><meta charset="UTF-8"><link href="css/index.css" rel="stylesheet"></head>
+          <body class="errorPage">
+            <h1>500</h1>
+            <p>Internal error, we're sorry</p>
+            <span> 👉🏻 </span>
+            <a href="http://${request.headers.host}">go home</a>
           </body>`)
           response.end()
           return;
