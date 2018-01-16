@@ -8,10 +8,11 @@
 </head>
 <body>
   <main>
-    <form id="file_upload_form" method="post" enctype="multipart/form-data" action="upload.php">
-      <input name="file" id="file" size="27" type="file"/><br/>
-      <input type="submit" name="action" value="Upload"/><br/>
-      <iframe id="upload_target" name="upload_target" src="" hidden></iframe>
+    <form id="up-pic" method="post" enctype="multipart/form-data" target="dummy" action="upload">
+      <input type="file" name="file-picker" accept="image/*" required/><br/>
+      <input type="submit" name="upload" value="Upload"/><br/>
+      <iframe name="dummy" src="about:blank" srcdoc="<html><head><meta charset='utf-8'></head></html>" hidden></iframe>
+      <p>The radius of the blur, specified as a length. It defines the value of the standard deviation to the Gaussian function, i.e., how many pixels on the screen blend into each other; thus, a larger value will create more blur. A value of 0 leaves the input unchanged. The lacuna value for interpolation is 0.</p>
     </form>
   </main>
 </body>

@@ -4,7 +4,7 @@
 //=============== 360x640 "popular phones" ================
 body
   background-color: #a9a9a9
-  font-family: sans-serif
+  font-family: helvetica, arial, sans-serif
   padding: 1rem
   font-size: 17px
 body.errorPage
@@ -17,8 +17,10 @@ body.errorPage
     font-size: 1.5em
   span.message
     font-size: 0.7em
-    &:nth-of-type(1)
-      font-style: italic
+    font-style: italic
+    &::after
+      font-style: normal
+      content: "  🤷🏻‍"
   p.link
     padding-top: 20vh
     font-size: 0.8em
