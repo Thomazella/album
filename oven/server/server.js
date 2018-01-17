@@ -4,7 +4,7 @@ const path = require('path')
 const util = require('util')
 const url = require('url')
 const port = 8077
-const debug = true
+const debug = false
 const c = {
   'green'   : '\033[32m',
   'red'     : '\033[31m',
@@ -18,8 +18,8 @@ http.createServer((request,response) => {
     console.dir({"method" : request.method,"url" : request.url})
   }
   let uri = url.parse(request.url)
-  let file = `${process.cwd()}${uri.pathname}` //make absolute path
-  if (request.url === "/") file = process.cwd() //we avoid a case where file ends in "/"
+  let _path = `${process.cwd()}${uri.pathname}` //make absolute path
+  if (request.url === "/") _path = process.cwd() //we avoid a case where path ends in "/"
   let headers = {}
   const mimeTypes = {
     '.html' :   'text/html',
@@ -49,15 +49,44 @@ http.createServer((request,response) => {
   };
   switch (request.method) {
     case 'POST':
-      console.dir(request.headers);
+      const boundary = "--"+request.headers['content-type'].match(/boundary=(.*)$/)[1] //get the boundary by running a regex. "--" is from form.
+      const name = "test"
+      const uniqueNumber = Date.now()
+      const destination = fs.createWriteStream(`${_path}/${name}-${uniqueNumber}`)
+      request.on('data', (chunk) => {
+        // console.log(`Received ${chunk.length} bytes of data.`)
+        let body
+        if (chunk.includes(boundary)) { // first and last chunk have form data, introduced by $boundary, that we want out of the file
+          let formDataStart, formDataEnd, formData
+          let formEndSequence = '\r\n\r\n' //last line of form data = \r\n, followed by an empty line = \r\n
+          formDataStart = chunk.indexOf(boundary,'utf8')
+          formDataEnd = chunk.indexOf(formEndSequence,formDataStart,'utf8') + formEndSequence.length //we add length to remove formEndSequence
+          formData = chunk.toString('utf8',formDataStart,formDataEnd)
+          console.log(formData);
+          // do shit with formData, like get file name etc...
+          if (formDataStart === 0) { //on first chunk take everything after form data. 0 bc 1st chunk opens with $boundary
+            body = chunk.slice(formDataEnd,chunk.length)
+          }
+          else { //on last chunk take until beginning of form data.
+            body = chunk.slice(0,formDataStart - 2) // -2 removes a \r\n added before $boundary only on the last chunk...
+          }
+        } else { //then it's just a middle chunk only with file data, so take it all
+          body = chunk
+        }
+        destination.write(body)
+        })
+      request.on('end', () => {
+        console.log(`end of data!`)
+        destination.end()
+      })
       response.end()
       break;
     case 'GET':
-      fs.readFile(file, (err, data) => {
+      fs.readFile(_path, (err, data) => {
         if (err) {
           switch (err.code) {
             case 'ENOENT':
-              console.error(`${c.red} 🔥 ${file} does not exist, serving 404${c.white} 🔥`);
+              // console.error(`${c.red} 🔥 ${_path} does not exist, serving 404${c.white} 🔥`);
               response.writeHead(404, {'Content-Type': 'text/html'})
               response.write(`
                 <head>
@@ -74,17 +103,17 @@ http.createServer((request,response) => {
               response.end()
               return;
             case 'EISDIR':
-              file = `${file}/index.html` //browser asked for a dir, give the index.html of that dir
-              console.log(`${c.yellow}dir request: "${request.url}", serving "${file}${c.white}"`);
+              _path = `${_path}/index.html` //browser asked for a dir, give the index.html of that dir
+              console.log(`${c.yellow}dir request: "${request.url}", serving "${_path}${c.white}"`);
               break;
             default:
               throw err;
               return
           }
         }
-        const extention = String(path.extname(file)).toLowerCase()
+        const extention = String(path.extname(_path)).toLowerCase()
         headers['Content-Type'] = mimeTypes[extention] || 'application/octet-stream' //<= unknown type
-        fs.readFile(file, (err, data) => {
+        fs.readFile(_path, (err, data) => {
           if (err) {
             console.dir(err)
             response.writeHead(500, {'Content-Type':'text/html'})
